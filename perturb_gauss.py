@@ -2,9 +2,10 @@ import numpy as np
 import mpmath as mp
 from scipy import integrate
 from matplotlib import pyplot as plt
+import coeff
 
 #set mpmath precision
-mp.mp.dps = 30
+mp.mp.dps = 50
 
 #mpmath numerical integration
 def mpintegr(l=0):
@@ -15,24 +16,20 @@ def mpintegr(l=0):
 def taylor(l, D):
     s = 0
     for n in range(0, D+1):
-        s += taylor_coeff(n) * mp.power(l, n)
+        s += coeff.GAUSS_4_COEFF[n] * mp.power(l, n)
     return s
 
 #taylor polynomial coefficient
 def taylor_coeff(n):
     return mp.power(-1, n) * mp.gamma(2*n+1/2) / mp.factorial(n)
 
-#calculate error of Dth taylor approximation at lamda=l
-def err(l, D):
-    print(l)
-    return taylor(l, D) - mpintegr(l)
-
 #calculate relative error
 def relerr(l, D):
-    return abs(err(l, D)) / mpintegr(l)
+    I = mpintegr(l)
+    return abs(taylor(l, D)-I) / I
 
 #graph exact value vs approximation comparison
-def draw(MAXD=16, MAXL=1):
+def graph(MAXD=16, MAXL=1):
     #sample 1000 lambda values from 0 to MAXL
     L = mp.linspace(0, MAXL, 1000)
 
@@ -56,4 +53,19 @@ def draw(MAXD=16, MAXL=1):
         plt.plot(L, P[D])
     plt.show()
 
-draw(MAXD=20)
+
+def graph_mejor(MAXD=16, MAXL=1):
+    
+
+#generates relative errors for taylor polynomials of degree 1~(MAXD-1) at lambda=l
+def errarray(l, MAXD=1000):
+    print(l)
+    s = 0
+    ERR_ARRAY = []
+    I = mpintegr(l)
+    for i in range(MAXD):
+        s = s + taylor_coeff(i) * mp.power(l, i)
+        ERR_ARRAY.append(abs(s-I)/I)
+    return ERR_ARRAY
+
+graph(MAXD=100)
